@@ -25,9 +25,23 @@ MAKEFLAGS += --warn-undefined-variables
 # Define the top-level directory of the Git repository
 Top=$(shell git rev-parse --show-toplevel)
 
-# Set the default data directory to 'data/optimize' under the Git root directory,
-# unless 'Data' is defined externally
+# ------------------------------------------------------------------------------
+
+help      :  ## show help
+	gawk -f $(Top)/etc/help.awk $(MAKEFILE_LIST)
+
+pull    : ## download
+	git pull
+
+push    : ## save
+	echo -en "\033[33mWhy this push? \033[0m"; read x; git commit -am "$$x"; git push; git status
+
+#experiment setting
+# Set the default data directory to 'data/optimize', unless 'Data' is defined externally
 Data ?= $(Top)/data/optimize
 
-# Set the default temporary directory to '~/tmp', unless 'Tmp' is defined externally
-Tmp  ?= $(HOME)/tmp
+# Set the default out directory to '~/Result', unless 'Out' is defined externally
+Out ?= $(HOME)/Result
+Act ?= 
+
+
