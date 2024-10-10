@@ -11,6 +11,7 @@
 # ------------------------------------------------------------------------------
 # Change Log:
 # - 2024-10-06: Initial creation with basic path setup and variable definitions.
+# - 2024-10-09: Add act: searchData
 # ------------------------------------------------------------------------------
 
 # Use bash as the shell for executing commands
@@ -38,10 +39,34 @@ push    : ## save
 
 #experiment setting
 # Set the default data directory to 'data/optimize', unless 'Data' is defined externally
-Data ?= $(Top)/data/optimize
+Data ?= $(Top)/data/optimize # default is tim's
+DatasetInfo := dataset_info.yaml
 
 # Set the default out directory to '~/Result', unless 'Out' is defined externally
 Out ?= $(HOME)/Result
-Act ?= 
+Act ?= searchData
+
+# example usage: make 
+.PHONY: searchData #declare they are not actual files, but rather command sets
+searchData : ## search datafile(csv) in $(Data), store their path and name in dataset_info.yaml 
+# check if DatasetInfo is not empty
+	@if [ -s $(DatasetInfo) ]; then \
+		echo "Warning: $(DatasetInfo) already exists and is not empty."; \
+		read -p "Do you want to overwrite it? (y/n): " choice; \
+	if [ "$$choice" != "y" ]; then \
+			echo "Aborting. No changes made."; \
+			exit 1; \
+		fi; \
+	fi
+	@echo "Searching for CSV files in $(Data)..."
+# find' locates all .csv files, then store them in yaml
+	@find $(Data) -type f -name "*.csv" | awk 'BEGIN { print "datasets:" } { \
+		name = gensub(".csv", "", "g", gensub(".*/", "", "g", $$0)); \
+		print "  - name: \"" name "\"\n    path: \"" $$0 "\"" \
+	}' > $(DatasetInfo)
+	@echo "Dataset information saved in $(DatasetInfo)"
+
+
+
 
 
